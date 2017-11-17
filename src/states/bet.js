@@ -7,11 +7,12 @@ export class BetState extends Phaser.State {
 		super();
 
 		this.dogs = {};
-		this.curBet = 1000;
-		this.curDog = Enums.Dogs.KIMBO;		
+		this.curDog = Enums.Dogs.KIMBO;	
 	}
 
 	create() {
+		this.curBet = Math.floor(this.game.save.get("highscore") * 0.005) * 100;
+
 		let centerX = this.game.world.centerX;
 		let titleY = 48;
 

@@ -254,6 +254,7 @@ export class PlayState extends Phaser.State {
 		});
 		this.feedButton.visible = false;
 		this.feedButton.onCooldown = false;
+		this.feedButton.scale.setTo(0.7);
 
 		let feedChance = config.get("feedChance");
 		let feedCosts = this.game.config.get("feedCosts");
@@ -268,6 +269,9 @@ export class PlayState extends Phaser.State {
 				this.feedButton.visible = false;
 				return;
 			}
+
+			let rndPos = this.game.rnd.integerInRange(-10, 10) * 10;
+			this.feedButton.x = centerX + rndPos;
 
 			let rnd = this.game.rnd.frac();
 			if (rnd - feedChance < 0) {
@@ -398,11 +402,11 @@ export class PlayState extends Phaser.State {
 		let fontSizeMenu = config.get("fontSize.menu");
 
 		// Draw current bet
-		this.curBet = this.game.add.bitmapText(centerX, titleY, "fnt_va", "Wetteinsatz: " + this.bet, fontSizeMenu);
+		this.curBet = this.game.add.bitmapText(centerX, titleY, "fnt_va", "WETTEINSATZ: " + this.bet, fontSizeMenu);
 		this.curBet.anchor.setTo(0.5);
 
 		// Draw current credits
-		this.credits = this.game.add.bitmapText(centerX, titleY + fontSizeMenu / 2 + 10, "fnt_va", "Credits: " + this.availableCredts, fontSizeMenu);
+		this.credits = this.game.add.bitmapText(centerX, titleY + fontSizeMenu / 2 + 10, "fnt_va", "CREDITS: " + this.availableCredts, fontSizeMenu);
 		this.credits.anchor.setTo(0.5);
 
 		this._createStartAnimation();
