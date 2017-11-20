@@ -11,6 +11,12 @@ export class MenuState extends Phaser.State {
 		let centerX = this.game.world.centerX;
 		let titleY = 48;
 
+		let highscore = this.game.save.get("highscore");
+		if (highscore < 100) {
+			highscore = 1000;
+			this.game.save.set("highscore", 1000);
+		}
+
 		let config 	= this.game.config;
 		let fontSizeTitle = config.get("fontSize.title");
 		let fontSizeSubtitle = config.get("fontSize.subtitle");
@@ -29,7 +35,7 @@ export class MenuState extends Phaser.State {
 		this.subtitle2.anchor.setTo(0.5);
 
 		// Draw Highscore
-		this.highscore = this.game.add.bitmapText(centerX, this.subtitle2.y + 40, "fnt_va", "CREDITS: " + this.game.save.get("highscore"), fontSizeMenu);
+		this.highscore = this.game.add.bitmapText(centerX, this.subtitle2.y + 40, "fnt_va", "CREDITS: " + highscore, fontSizeMenu);
 		this.highscore.anchor.setTo(0.5);
 
 		// Draw Kimbo
