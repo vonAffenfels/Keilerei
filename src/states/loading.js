@@ -26,6 +26,8 @@ export class LoadingState extends Phaser.State {
 
 		this.game.load.spritesheet("sprite-buttons", "assets/images/sprite-buttons-108x108.png", 108, 108, 4);
 		this.game.load.spritesheet("sprite-cloud", "assets/images/sprite-cloud-547x559.png", 547, 559, 8);
+		this.game.load.spritesheet("sprite-cloud-blank", "assets/images/sprite-cloud-blank-547x559.png", 547, 559, 8);
+		this.game.load.spritesheet("sprite-cloud-dogs", "assets/images/sprite-cloud-dogs-547x559.png", 547, 559, 8);
 		this.game.load.spritesheet("sprite-alerts", "assets/images/sprite-alerts-234x169.png", 234, 169, 5);
 		this.game.load.image("icon-plus-meat", "assets/images/icon-plus-meat.png");
 

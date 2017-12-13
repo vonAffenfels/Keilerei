@@ -13,77 +13,8 @@ export class PlayState extends Phaser.State {
 		this.availableCredts = this.game.save.get("highscore") - this.bet;
 
 		let foodCosts = this.game.config.get("feedCosts");
-		this.oppCredits = Math.floor(this.game.rnd.integerInRange(0, this.availableCredts) / foodCosts) * foodCosts;
 
 		this.playState = Enums.PlayStates.ANIMATION;
-	}
-
-	_getOpponent(dog) {
-		if (dog == Enums.Dogs.KIMBO) {
-			return Enums.Dogs.KIRBY;
-		} else if (dog == Enums.Dogs.KIRBY) {
-			return Enums.Dogs.KIMBO;
-		}
-
-		return null;
-	}
-
-	_activateFeed(dog, btn) {
-		if (btn.onCooldown) {
-			return;
-		}
-
-		btn.onCooldown = true;
-		btn.visible = false;
-
-		let cooldownTimer = this.game.time.create(false);
-		cooldownTimer.loop(this.game.config.get("feedCooldown"), () => {
-			btn.onCooldown = false;
-			cooldownTimer.destroy();
-		});
-		cooldownTimer.start();
-
-		let feedCosts = this.game.config.get("feedCosts");
-		if (dog == this.dog) {	
-			let newVal = this.availableCredts - feedCosts;
-			this.availableCredts = newVal;
-			this.credits.text = "CREDITS: " + this.availableCredts;
-		} else if (dog == this._getOpponent(this.dog)) {
-			let newVal = this.oppCredits - feedCosts;
-			this.oppCredits = newVal;
-		}
-		
-		this._feedDog(dog);
-	}
-
-	_feedDog(dog) {
-		let feedValue = this.game.config.get("feedValue");
-		if (dog != this.dog) {
-			feedValue = this.game.config.get("opponentFeedValue");
-		}
-		this.dogs[dog].health = Math.min(100, this.dogs[dog].health + feedValue);
-
-		let startX = 0;
-		let startY = this.game.world.centerY - 180;
-		let align = 0;
-		if (dog == Enums.Dogs.KIMBO) {
-			startX = this.game.world.centerX - 150;
-		} else if (dog == Enums.Dogs.KIRBY) {
-			startX = this.game.world.centerX + 150;
-			align = 1;
-		}
-
-		let buffSprite = this.game.add.sprite(startX, startY, "icon-plus-meat");
-		buffSprite.anchor.setTo(align, 1);
-
-		let buffTween = this.game.add.tween(buffSprite);
-		buffTween.to({y: startY - 50, alpha: 0});
-		buffTween.onComplete.add(() => {
-			buffSprite.destroy();
-		});
-		buffTween.start();
-
-		this.powerUpAudio.play();
 	}
 
 	_createStartAnimation() {
@@ -223,17 +154,45 @@ export class PlayState extends Phaser.State {
 		this.dogs[Enums.Dogs.KIRBY].timer.stop();
 		this.dogs[Enums.Dogs.KIRBY].timer.destroy();
 
-		this.oppFeedTimer.stop();
-		this.oppFeedTimer.destroy();
-
-		this.feedTimer.stop();
-		this.feedTimer.destroy();
 		this.feedButton.destroy();
 
 		this.cloud.destroy();
+		this.cloudDogs.destroy();
 
 		this.credits.destroy();
 		this.curBet.destroy();
+	}
+
+	_feedDog(dog) {
+		let feedCosts = this.game.config.get("feedCosts");
+		let newVal = this.availableCredts - feedCosts;
+		this.availableCredts = newVal;
+		this.credits.text = "CREDITS: " + this.availableCredts;
+
+		let feedValue = this.game.config.get("feedValue");
+		this.dogs[dog].health = Math.min(100, this.dogs[dog].health + feedValue);
+
+		let startX = 0;
+		let startY = this.game.world.centerY - 180;
+		let align = 0;
+		if (dog == Enums.Dogs.KIMBO) {
+			startX = this.game.world.centerX - 150;
+		} else if (dog == Enums.Dogs.KIRBY) {
+			startX = this.game.world.centerX + 150;
+			align = 1;
+		}
+
+		let buffSprite = this.game.add.sprite(startX, startY, "icon-plus-meat");
+		buffSprite.anchor.setTo(align, 1);
+
+		let buffTween = this.game.add.tween(buffSprite);
+		buffTween.to({y: startY - 50, alpha: 0});
+		buffTween.onComplete.add(() => {
+			buffSprite.destroy();
+		});
+		buffTween.start();
+
+		this.powerUpAudio.play();
 	}
 
 	_createGameField() {
@@ -248,76 +207,17 @@ export class PlayState extends Phaser.State {
 		let centerY = this.game.world.centerY;
 		let centerX = this.game.world.centerX;
 
-		this.cloud = this.game.add.sprite(centerX, centerY, "sprite-cloud", 0);
+		this.cloud = this.game.add.sprite(centerX, centerY, "sprite-cloud-blank", 0);
 		this.cloud.animations.add("cloud", [0, 1, 2, 3, 4, 5, 6, 7]);
 		this.cloud.anchor.setTo(0.5);
 		this.cloud.scale.setTo(0.6);
 		this.cloud.animations.play("cloud", 12, true);
 
-		this.feedButton = this.game.add.sprite(centerX, this.game.world.height - 80, "sprite-buttons", 1);
-		this.feedButton.anchor.setTo(0.5);
-		this.feedButton.inputEnabled = true;
-		this.feedButton.events.onInputDown.add(() => {
-			this._activateFeed(this.dog, this.feedButton);
-		});
-		this.feedButton.visible = false;
-		this.feedButton.onCooldown = false;
-		this.feedButton.scale.setTo(0.7);
-
-		let feedChance = config.get("feedChance");
-		let feedCosts = this.game.config.get("feedCosts");
-
-		this.feedTimer = this.game.time.create(false);
-		this.feedTimer.loop(config.get("feedDuration"), () => {
-			if (this.feedButton.onCooldown) {
-				return;
-			}
-
-			if (this.feedButton.visible) {
-				this.feedButton.visible = false;
-				return;
-			}
-
-			let rndPos = this.game.rnd.integerInRange(-10, 10) * 10;
-			this.feedButton.x = centerX + rndPos;
-
-			let rnd = this.game.rnd.frac();
-			if (rnd - feedChance < 0) {
-				if (this.availableCredts >= feedCosts) {
-					this.feedButton.visible = true;
-				}
-			}
-		});
-		this.feedTimer.start();
-
-		this.oppFeedButton = {};
-		this.oppFeedButton.visible = false;
-		this.oppFeedButton.onCooldown = false;
-
-		let opponentFeedChance = config.get("opponentFeedChance");
-
-		this.oppFeedTimer = this.game.time.create(false);
-		this.oppFeedTimer.loop(config.get("feedDuration"), () => {
-			if (this.oppFeedButton.onCooldown) {
-				return;
-			}
-
-			if (this.oppFeedButton.visible) {
-				this.oppFeedButton.visible = false;
-				return;
-			}
-
-			let rnd = this.game.rnd.frac();
-			if (rnd - feedChance < 0) {
-				this.oppFeedButton.visible = true;
-
-				rnd = this.game.rnd.frac();
-				if (rnd - opponentFeedChance < 0 && this.oppCredits >= feedCosts) {
-					this._activateFeed(this._getOpponent(this.dog), this.oppFeedButton);
-				}
-			}
-		});
-		this.oppFeedTimer.start();
+		this.cloudDogs = this.game.add.sprite(centerX, centerY, "sprite-cloud-dogs", 0);
+		this.cloudDogs.animations.add("cloudDogs", [0, 1, 2, 3, 4, 5, 6, 7]);
+		this.cloudDogs.anchor.setTo(0.5);
+		this.cloudDogs.scale.setTo(0.6);
+		this.cloudDogs.animations.play("cloudDogs", 12, true);
 
 		let kimboBar = this.game.add.sprite(centerX - 150, centerY - 180, "progress-kimbo");
 		kimboBar.scale.setTo(0.6);
@@ -329,6 +229,16 @@ export class PlayState extends Phaser.State {
 		kirbyBar.anchor.setTo(1, 0);
 		kirbyBar.bar = this.game.add.graphics(0, 0);
 		kirbyBar.bar.alignTo(kirbyBar, Phaser.TOP_LEFT, -26, -16);
+
+		this.feedButton = this.game.add.sprite(centerX, this.game.world.height - 80, "sprite-buttons", 1);
+		this.feedButton.anchor.setTo(0.5);
+		this.feedButton.inputEnabled = true;
+		this.feedButton.events.onInputDown.add(() => {
+			this._feedDog(this.shownDog);
+		});
+		this.feedButton.visible = false;
+		this.feedButton.scale.setTo(0.7);
+		this.shownDog = null;
 
 		this.dogs[Enums.Dogs.KIMBO].healthBar = kimboBar;
 		this.dogs[Enums.Dogs.KIRBY].healthBar = kirbyBar;
@@ -348,8 +258,42 @@ export class PlayState extends Phaser.State {
 		this.dogs[Enums.Dogs.KIMBO].timer = kimboTimer;
 		this.dogs[Enums.Dogs.KIRBY].timer = kirbyTimer;
 
+		this.dogArray = [Enums.Dogs.KIMBO, Enums.Dogs.KIRBY];
+
+		this.dogs[Enums.Dogs.KIMBO].cloudFrame = 0;
+		this.dogs[Enums.Dogs.KIRBY].cloudFrame = 4;
+
+		this.dogSelectTimer = this.game.time.create(false);
+		this.dogSelectTimer.loop(2000, () => {
+			let dog = Phaser.ArrayUtils.getRandomItem(this.dogArray);
+			this.shownDog = dog;
+			this.cloudDogs.animations.stop("cloudDogs");
+			this.cloudDogs.frame = this.dogs[dog].cloudFrame;
+
+			this.feedButton.visible = true;
+
+			let dogFinishSelectTimer = this.game.time.create(false);
+			dogFinishSelectTimer.add(500, () => {
+				this.cloudDogs.animations.play("cloudDogs");
+				this.feedButton.visible = false;
+			});
+
+			dogFinishSelectTimer.start();
+		});
+		this.dogSelectTimer.start();
+
 		this.shouldPlayGrowl = true;
 		this._playRandomGrowl();
+	}
+
+	_getOpponent(dog) {
+		if (dog == Enums.Dogs.KIMBO) {
+			return Enums.Dogs.KIRBY;
+		} else if (dog == Enums.Dogs.KIRBY) {
+			return Enums.Dogs.KIMBO;
+		}
+
+		return null;
 	}
 
 	_hit(dog) {
@@ -402,6 +346,7 @@ export class PlayState extends Phaser.State {
 		});
 		alertTween.start();
 	}
+
 
 	_destroyStartAnimation() {
 		this.kimboRun.destroy();
@@ -459,13 +404,12 @@ export class PlayState extends Phaser.State {
 			return;
 		}
 
-		console.log("PLAY GROWL");
 		let growlAudio = Phaser.ArrayUtils.getRandomItem(this.growlAudio.filter(v => v.isDecoded));
 		growlAudio.play();
-		growlAudio.onStop.add(() => {
+		growlAudio.onStop.addOnce(() => {
 			setTimeout(() => {
 				this._playRandomGrowl();
 			}, 1000);
-		})
+		});
 	}
 }

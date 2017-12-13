@@ -41,6 +41,10 @@ export class BootState extends Phaser.State {
 			this.game.scale.leaveIncorrectOrientation.add(this.game.onLeaveIncorrectOrientation, this.game);			
 		}
 
+		// Deactivate Sound
+		// DEBUG
+		this.game.sound.mute = true;
+
 		// Start loading stage
 		this.game.state.start(Enums.States.LOADING);
 	}
