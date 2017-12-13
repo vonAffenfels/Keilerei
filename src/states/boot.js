@@ -43,7 +43,7 @@ export class BootState extends Phaser.State {
 
 		// Deactivate Sound
 		// DEBUG
-		this.game.sound.mute = true;
+		//this.game.sound.mute = true;
 
 		// Start loading stage
 		this.game.state.start(Enums.States.LOADING);
