@@ -28,6 +28,21 @@ export class LoadingState extends Phaser.State {
 		this.game.load.spritesheet("sprite-cloud", "assets/images/sprite-cloud-547x559.png", 547, 559, 8);
 		this.game.load.spritesheet("sprite-alerts", "assets/images/sprite-alerts-234x169.png", 234, 169, 5);
 		this.game.load.image("icon-plus-meat", "assets/images/icon-plus-meat.png");
+
+		this.load.audio("dogs_loop", ["assets/sounds/keilerei_dogs_loop.mp3"]);
+		this.load.audio("fight_loop", ["assets/sounds/keilerei_fight_loop.mp3"]);
+		this.load.audio("idle_loop", ["assets/sounds/keilerei_idle_loop.mp3"]);
+		this.load.audio("power_up", ["assets/sounds/keilerei_power_up.mp3"]);
+
+		for (let i = 1; i <= 8; i++) {
+			let num = i < 10 ? "0" + i.toString() : i.toString();
+			this.load.audio("dog_growl_" + i, ["assets/sounds/keilerei_dog_growl_" + num + ".mp3"]);
+		}
+
+		for (let i = 1; i <= 14; i++) {
+			let num = i < 10 ? "0" + i.toString() : i.toString();
+			this.load.audio("punch_" + i, ["assets/sounds/keilerei_punch_" + num + ".mp3"]);
+		}
 	}
 
 	create() {

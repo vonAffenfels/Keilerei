@@ -11,6 +11,9 @@ export class MenuState extends Phaser.State {
 		let centerX = this.game.world.centerX;
 		let titleY = 48;
 
+		// Play background music
+		this.game.playBackgroundAudio("idle_loop");
+
 		let highscore = this.game.save.get("highscore");
 		if (highscore < 100) {
 			highscore = 1000;

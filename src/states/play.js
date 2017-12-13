@@ -82,6 +82,8 @@ export class PlayState extends Phaser.State {
 			buffSprite.destroy();
 		});
 		buffTween.start();
+
+		this.powerUpAudio.play();
 	}
 
 	_createStartAnimation() {
@@ -115,6 +117,8 @@ export class PlayState extends Phaser.State {
 	_winning(dog) {
 		this.playState = Enums.PlayStates.WON;
 		this._destroyGameField();
+
+		this.shouldPlayGrowl = false;
 
 		let centerX = this.game.world.centerX;
 		let dogX = centerX / 2;
@@ -157,6 +161,10 @@ export class PlayState extends Phaser.State {
 		let config 	= this.game.config;
 		let fontSizeMenu = config.get("fontSize.menu");
 		let fontSizeTitle = config.get("fontSize.title");
+
+		this.game.playBackgroundAudio("idle_loop");
+		this.dogsLoopAudio.stop();
+		this.dogsLoopAudio.destroy();
 
 		// Draw title
 		this.title = this.game.add.bitmapText(centerX, 48, "fnt_va", dogName + " GEWINNT!", fontSizeTitle);
@@ -339,6 +347,9 @@ export class PlayState extends Phaser.State {
 
 		this.dogs[Enums.Dogs.KIMBO].timer = kimboTimer;
 		this.dogs[Enums.Dogs.KIRBY].timer = kirbyTimer;
+
+		this.shouldPlayGrowl = true;
+		this._playRandomGrowl();
 	}
 
 	_hit(dog) {
@@ -353,6 +364,11 @@ export class PlayState extends Phaser.State {
 		if (hitRnd - hitChance > 0) {
 			// No hit
 			return;
+		}
+
+		let hitAudio = Phaser.ArrayUtils.getRandomItem(this.hitAudio.filter(v => v.isDecoded));
+		if (hitAudio) {
+			hitAudio.play();
 		}
 
 		let isCrit = false;
@@ -398,6 +414,26 @@ export class PlayState extends Phaser.State {
 		let centerX = this.game.world.centerX;
 		let titleY = 48;
 
+		this.shouldPlayGrowl = false;
+
+		this.game.playBackgroundAudio("fight_loop");
+		this.dogsLoopAudio = this.game.add.audio("dogs_loop", 1, true);
+		this.dogsLoopAudio.onDecoded.add(() => {
+			this.dogsLoopAudio.play();
+		});
+
+		this.powerUpAudio = this.game.add.audio("power_up");
+
+		this.hitAudio = [];
+		for (let i = 1; i <= 14; i++) {
+			this.hitAudio[i] = this.game.add.audio("punch_" + i);
+		}
+
+		this.growlAudio = [];
+		for (let i = 1; i <= 8; i++) {
+			this.growlAudio[i] = this.game.add.audio("dog_growl_" + i);
+		}
+
 		let config 	= this.game.config;
 		let fontSizeMenu = config.get("fontSize.menu");
 
@@ -416,5 +452,20 @@ export class PlayState extends Phaser.State {
 		if (this.playState == Enums.PlayStates.FIGHT) {
 			this._updateGameField();
 		}
+	}
+
+	_playRandomGrowl() {
+		if (!this.shouldPlayGrowl) {
+			return;
+		}
+
+		console.log("PLAY GROWL");
+		let growlAudio = Phaser.ArrayUtils.getRandomItem(this.growlAudio.filter(v => v.isDecoded));
+		growlAudio.play();
+		growlAudio.onStop.add(() => {
+			setTimeout(() => {
+				this._playRandomGrowl();
+			}, 1000);
+		})
 	}
 }

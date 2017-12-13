@@ -38,6 +38,23 @@ class Game extends Phaser.Game {
 		this.orientated = false;
 		document.getElementById('orientation').style.display = 'none';
 	}
+
+	playBackgroundAudio(key) {
+		if (this._currentAudio == key) {
+			return;
+		}
+
+		if (this._backgroundAudio) {
+			this._backgroundAudio.stop();
+			this._backgroundAudio.destroy();
+		}
+
+		this._currentAudio = key;
+		this._backgroundAudio = this.add.audio(key, 1, true);
+		this._backgroundAudio.onDecoded.add(() => {
+			this._backgroundAudio.play();
+		});
+	}
 }
 
 window.Game = Game;

@@ -11,6 +11,9 @@ export class BetState extends Phaser.State {
 	}
 
 	create() {
+		// Play background music
+		this.game.playBackgroundAudio("idle_loop");
+
 		this.curBet = Math.floor(this.game.save.get("highscore") * 0.005) * 100;
 
 		let centerX = this.game.world.centerX;
