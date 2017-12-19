@@ -108,7 +108,8 @@ export class PlayState extends Phaser.State {
 			this.game.save.set("highscore", this.availableCredts + this.bet * 2);
 		} else {
 			this.userWin = this.game.add.bitmapText(centerX, this.title.y + fontSizeTitle / 2 + 20, "fnt_va", "DU VERLIERST", fontSizeMenu);
-			this.userWin.anchor.setTo(0.5);					
+			this.userWin.anchor.setTo(0.5);
+			this.game.save.set("highscore", this.availableCredts - this.bet);
 		}
 
 		// Draw OK Button
