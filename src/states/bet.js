@@ -14,8 +14,6 @@ export class BetState extends Phaser.State {
 		// Play background music
 		this.game.playBackgroundAudio("idle_loop");
 
-		this.curBet = Math.floor(this.game.save.get("highscore") * 0.005) * 100;
-
 		let centerX = this.game.world.centerX;
 		let titleY = 48;
 
@@ -27,6 +25,8 @@ export class BetState extends Phaser.State {
 		let minBet = config.get("bet.minBet");
 		let maxBet = Math.min(config.get("bet.maxBet"), this.game.save.get("highscore"));
 		let betSteps = config.get("bet.betSteps");
+
+		this.curBet = Math.min(Math.floor(this.game.save.get("highscore") * 0.005) * 100, maxBet);
 
 		// Draw title
 		this.title = this.game.add.bitmapText(centerX, titleY, "fnt_va", "WETTEINSATZ", fontSizeTitle);
